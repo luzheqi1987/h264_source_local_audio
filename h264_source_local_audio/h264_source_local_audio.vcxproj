@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4A538C8D-F97F-4C5F-9321-4C3AE6E11534}</ProjectGuid>
+    <RootNamespace>h264_source_local_audio</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\deps\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;winmm.lib;..\deps\bin\avcodec.lib;..\deps\bin\avfilter.lib;..\deps\bin\avdevice.lib;..\deps\bin\avutil.lib;..\deps\bin\swscale.lib;..\deps\bin\avformat.lib;..\deps\bin\swresample.lib;..\deps\bin\w32-pthreadsd.lib;..\deps\bin\librtmpd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\workspace\vr\h264_source_local_audio\deps\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>E:\workspace\vr\h264_source_local_audio\deps\bin\avcodec.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\avfilter.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\avdevice.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\avutil.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\swscale.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\avformat.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\swresample.lib;E:\workspace\vr\h264_source_local_audio\deps\bin\w32-pthreadsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="jerky-circlebuf.h" />
+    <ClInclude Include="jerky-encoder.h" />
+    <ClInclude Include="jerky-h264-source.h" />
+    <ClInclude Include="jerky-rtmp-stream.h" />
+    <ClInclude Include="net-if.h" />
+    <ClInclude Include="util\base.h" />
+    <ClInclude Include="util\bmem.h" />
+    <ClInclude Include="util\c99defs.h" />
+    <ClInclude Include="util\darray.h" />
+    <ClInclude Include="util\dstr.h" />
+    <ClInclude Include="util\lexer.h" />
+    <ClInclude Include="util\platform.h" />
+    <ClInclude Include="util\threading-windows.h" />
+    <ClInclude Include="util\threading.h" />
+    <ClInclude Include="util\utf8.h" />
+    <ClInclude Include="util\windows\win-version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="jerky-encoder.cpp" />
+    <ClCompile Include="jerky-h264-source.cpp" />
+    <ClCompile Include="jerky-rtmp-stream.cpp" />
+    <ClCompile Include="net-if.c" />
+    <ClCompile Include="util\base.c" />
+    <ClCompile Include="util\bmem.c" />
+    <ClCompile Include="util\dstr.c" />
+    <ClCompile Include="util\lexer.c" />
+    <ClCompile Include="util\platform-windows.c" />
+    <ClCompile Include="util\platform.c" />
+    <ClCompile Include="util\threading-windows.c" />
+    <ClCompile Include="util\utf8.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
