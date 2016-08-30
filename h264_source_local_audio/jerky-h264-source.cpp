@@ -15,6 +15,8 @@ struct jerky_h264_source* jerky_h264_source_init()
 	h264Source->m_formatCtx = avformat_alloc_context();
 	h264Source->m_streamUrl = "rtsp://192.168.5.1:8557/h264";
 	h264Source->m_stop = false;
+	h264Source->m_videoIndex = -1;
+	h264Source->m_metaData = NULL;
 
 	AVDictionary* options = NULL;
 	std::string strStreamUrl = h264Source->m_streamUrl;
@@ -38,10 +40,63 @@ struct jerky_h264_source* jerky_h264_source_init()
 void jerky_h264_source_thread(void *args){
 	struct jerky_h264_source *h264Source = (struct jerky_h264_source *) args;
 	AVPacket *packet = packet = (AVPacket *)av_malloc(sizeof(AVPacket));
+	h264Source->find_video_index();
+	bool gotPicture = false;
 
 	while (!h264Source->m_stop && av_read_frame(h264Source->m_formatCtx, packet) >= 0){
 		printf("Receive Packet, Packet Stream Index Is: %d, Frame Type: %d \n", packet->stream_index, packet->flags);
+		if (packet->stream_index == h264Source->m_videoIndex){
+			if (packet->flags && !h264Source->m_metaData){
+
+			}
+		}
 	}
+}
+
+int jerky_h264_source::fetchSpsPps(AVPacket *packet){
+	AVBitStreamFilterContext* h264bsfc = av_bitstream_filter_init("h264_mp4toannexb");
+	unsigned char * packetData = (unsigned char*)malloc(packet->size);
+	NaluUnit naluUnit;
+	this->m_metaData = (RTMPMetadata *)malloc(sizeof(RTMPMetadata));
+
+	memcpy(packetData, packet->data, packet->size);
+	int packetSize = packet->size;
+	if (packet->size == 0){
+		return FALSE;
+	}
+
+	bool result = ReadFirstNaluFromBuf(naluUnit, packetSize, packetData);
+	if (!result || naluUnit.type != 7){
+		return FALSE;
+	}
+	this->m_metaData->nSpsLen = naluUnit.size;
+	this->m_metaData->Sps = NULL;
+	this->m_metaData->Sps = (unsigned char*)malloc(naluUnit.size);
+	memcpy(this->m_metaData->Sps, naluUnit.data, naluUnit.size);
+
+	// ¶ÁÈ¡PPSÖ¡
+	result = ReadOneNaluFromBuf(naluUnit, packetSize, packetData);
+	if (!result || naluUnit.type != 8){
+		return FALSE;
+	}
+	this->m_metaData->nPpsLen = naluUnit.size;
+	this->m_metaData->Pps = NULL;
+	this->m_metaData->Pps = (unsigned char*)malloc(naluUnit.size);
+	memcpy(this->m_metaData->Pps, naluUnit.data, naluUnit.size);
+
+	return TRUE;
+}
+
+int jerky_h264_source::find_video_index()
+{	
+	for (unsigned int i = 0; i < this->m_formatCtx->nb_streams; i++) {
+		if (this->m_formatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO){
+			this->m_videoIndex = i;
+			break;
+		}
+	}
+
+	return this->m_videoIndex;
 }
 
 /**

@@ -38,13 +38,17 @@ extern "C"{
 
 struct jerky_h264_source
 {
+	int m_videoIndex;
 	int nalhead_pos;
 	bool m_stop;
 	char * m_streamUrl;
-	AVFormatContext* m_formatCtx;
+	RTMPMetadata * m_metaData;
+	AVFormatContext * m_formatCtx;
 
 	int ReadFirstNaluFromBuf(NaluUnit &nalu, int packetSize, unsigned char *packetData);
 	int ReadOneNaluFromBuf(NaluUnit &nalu, int packetSize, unsigned char *packetData);
+	int find_video_index();
+	int fetchSpsPps(AVPacket *packet);
 };
 
 typedef struct _NaluUnit
