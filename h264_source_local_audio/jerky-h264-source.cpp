@@ -42,7 +42,51 @@ void jerky_h264_source_thread(void *args){
 	AVPacket *packet = packet = (AVPacket *)av_malloc(sizeof(AVPacket));
 	h264Source->find_video_index();
 	bool gotPicture = false;
+	int ret;
+	AVOutputFormat *ofmt = NULL;
+	AVFormatContext *ofmt_ctx = NULL;
+	const char * out_filename = "rtmp://192.168.1.158/live/test2"; //输出 URL（Output URL）[RTMP]  
+	av_register_all();
+	//Network  
+	avformat_network_init();
+	//输出（Output）  
+	avformat_alloc_output_context2(&ofmt_ctx, NULL, "flv", out_filename); //RTMP  
+	if (!ofmt_ctx) {
+		printf("Could not create output context\n");
+		ret = AVERROR_UNKNOWN;
+		return;
+	}
+	ofmt = ofmt_ctx->oformat;
 
+	for (int i = 0; i < h264Source->m_formatCtx->nb_streams; i++) {
+		//根据输入流创建输出流（Create output AVStream according to input AVStream）  
+		AVStream *in_stream = h264Source->m_formatCtx->streams[i];
+		AVStream *out_stream = avformat_new_stream(ofmt_ctx, in_stream->codec->codec);
+		if (!out_stream) {
+			printf("Failed allocating output stream\n");
+			ret = AVERROR_UNKNOWN;
+			return;
+		}
+		//复制AVCodecContext的设置（Copy the settings of AVCodecContext）  
+		ret = avcodec_copy_context(out_stream->codec, in_stream->codec);
+		if (ret < 0) {
+			printf("Failed to copy context from input to output stream codec context\n");
+			return;
+		}
+		out_stream->codec->codec_tag = 0;
+		if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
+			out_stream->codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
+	}
+	//Dump Format------------------  
+	av_dump_format(ofmt_ctx, 0, out_filename, 1);
+
+	if (!(ofmt->flags & AVFMT_NOFILE)) {
+		ret = avio_open(&ofmt_ctx->pb, out_filename, AVIO_FLAG_WRITE);
+		if (ret < 0) {
+			printf("Could not open output URL '%s'", out_filename);
+			return;
+		}
+	}
 	while (!h264Source->m_stop && av_read_frame(h264Source->m_formatCtx, packet) >= 0){
 		printf("Receive Packet, Packet Stream Index Is: %d, Frame Type: %d \n", packet->stream_index, packet->flags);
 		if (packet->stream_index == h264Source->m_videoIndex){
@@ -245,6 +289,9 @@ int main(int argc, char* argv[]){
 	jerky_h264_source* h264Source = jerky_h264_source_init();
 	std::thread h264SourceThread(jerky_h264_source_thread, h264Source);
 	h264SourceThread.join();
+
+	
+
 	system("pause");
 	return 0;
 }
