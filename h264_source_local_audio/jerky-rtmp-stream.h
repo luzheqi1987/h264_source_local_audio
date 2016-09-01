@@ -1,14 +1,14 @@
+#pragma once
 
+
+#include <iostream>
 #include <inttypes.h>
 #include "librtmp/rtmp.h"
 #include "librtmp/log.h"
+#include "util/bmem.h"
+#include "util/dstr.h"
 #include "jerky-circlebuf.h"
 #include "w32-pthreads/pthread.h"
-
-struct dstr {
-	char *array;
-	size_t len; 
-};
 
 struct rtmp_stream {
 	struct jerky_circlebuf packets;

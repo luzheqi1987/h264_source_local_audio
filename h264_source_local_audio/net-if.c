@@ -16,8 +16,8 @@
 ******************************************************************************/
 
 #include "net-if.h"
-#include <util/platform.h>
-#include <util/dstr.h>
+#include "util/platform.h"
+#include "util/dstr.h"
 
 #define do_log(level, format, ...) \
 	blog(level, "[net if] " format, ##__VA_ARGS__)

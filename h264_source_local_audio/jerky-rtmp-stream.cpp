@@ -6,8 +6,11 @@
 #include "net-if.h"
 
 
+
 static inline size_t num_buffered_packets(struct rtmp_stream *stream);
 static inline void set_rtmp_dstr(AVal *val, struct dstr *str);
+static void win32_log_interface_type(struct rtmp_stream *stream);
+static inline void free_packets(struct rtmp_stream *stream);
 
 static void *rtmp_stream_create()
 {
@@ -27,8 +30,6 @@ static bool init_connect(struct rtmp_stream *stream)
 	int64_t drop_b;
 
 	free_packets(stream);
-
-
 
 	stream->disconnected = true;
 	stream->total_bytes_sent = 0;

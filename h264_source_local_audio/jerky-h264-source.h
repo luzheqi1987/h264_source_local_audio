@@ -35,22 +35,6 @@ extern "C"{
 #define GOT_A_NAL_INCLUDE_A_BUFFER BUFFER_SIZE+2
 #define NO_MORE_BUFFER_TO_READ BUFFER_SIZE+3
 
-
-struct jerky_h264_source
-{
-	int m_videoIndex;
-	int nalhead_pos;
-	bool m_stop;
-	char * m_streamUrl;
-	RTMPMetadata * m_metaData;
-	AVFormatContext * m_formatCtx;
-
-	int ReadFirstNaluFromBuf(NaluUnit &nalu, int packetSize, unsigned char *packetData);
-	int ReadOneNaluFromBuf(NaluUnit &nalu, int packetSize, unsigned char *packetData);
-	int find_video_index();
-	int fetchSpsPps(AVPacket *packet);
-};
-
 typedef struct _NaluUnit
 {
 	int type;
@@ -69,3 +53,23 @@ typedef struct _RTMPMetadata
 	unsigned int    nPpsLen;
 	unsigned char   *Pps;
 } RTMPMetadata, *LPRTMPMetadata;
+
+struct jerky_h264_source
+{
+	unsigned int m_videoIndex;
+	int nalhead_pos;
+	bool m_stop;
+	char * m_streamUrl;
+	RTMPMetadata * m_metaData;
+	AVFormatContext * m_formatCtx;
+	AVCodecContext	*m_videoCodecCtx;
+	AVCodec			*m_videoCodec;
+
+};
+
+
+int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData);
+int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData);
+int find_video_index(jerky_h264_source* h264Source);
+int video_codec_init(jerky_h264_source* h264Source);
+int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet);
