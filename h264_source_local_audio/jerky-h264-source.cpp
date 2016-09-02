@@ -18,13 +18,11 @@ struct jerky_h264_source* jerky_h264_source_init()
 	struct jerky_h264_source *h264Source = (jerky_h264_source *)malloc(sizeof(h264Source));
 	h264Source = (jerky_h264_source *)malloc(sizeof(jerky_h264_source));
 	h264Source->m_formatCtx = avformat_alloc_context();
-	h264Source->m_streamUrl = "rtsp://192.168.5.1:8557/h264";
+	h264Source->m_streamUrl = "rtmp://gs.live.rgbvr.com/rgbvr/asdasd";
 	h264Source->m_stop = false;
 	h264Source->m_videoIndex = 0;
 	h264Source->m_metaData = NULL;
 	h264Source->nalhead_pos = 0;
-
-
 
 	AVDictionary* options = NULL;
 	std::string strStreamUrl = h264Source->m_streamUrl;
@@ -85,84 +83,28 @@ void jerky_h264_source_thread(void *args){
 	AVPacket *packet = (AVPacket *)av_malloc(sizeof(AVPacket));
 	bool gotPicture = false;
 	int ret;
-	AVOutputFormat *ofmt = NULL;
-	AVFormatContext *ofmt_ctx = NULL;
-	//const char * out_filename = "rtmp://192.168.1.158/live/test2"; //输出 URL（Output URL）[RTMP]  
-	const char * out_filename = "rtmp://gs.push.rgbvr.com/rgbvr/test2"; //输出 URL（Output URL）[RTMP]  
-	//av_register_all();
-	//Network  
-	//avformat_network_init();
-	//输出（Output）  
-	avformat_alloc_output_context2(&ofmt_ctx, NULL, "flv", out_filename); //RTMP  
-	if (!ofmt_ctx) {
-		printf("Could not create output context\n");
-		ret = AVERROR_UNKNOWN;
-		return;
-	}
-	ofmt = ofmt_ctx->oformat;
-	for (int i = 0; i < h264Source->m_formatCtx->nb_streams; i++) {
-		//根据输入流创建输出流（Create output AVStream according to input AVStream）  
-		AVStream *in_stream = h264Source->m_formatCtx->streams[i];
-		AVStream *out_stream = avformat_new_stream(ofmt_ctx, in_stream->codec->codec);
-		//printf("codec pix_fmts: %d \n", in_stream->codec->codec->pix_fmts);
-		if (!out_stream) {
-			printf("Failed allocating output stream\n");
-			ret = AVERROR_UNKNOWN;
-			return;
-		}
-		//复制AVCodecContext的设置（Copy the settings of AVCodecContext）  
-		ret = avcodec_copy_context(out_stream->codec, in_stream->codec);
-		AVRational bastTime;
-		bastTime.num = AV_TIME_BASE;
-		bastTime.den = 1;
-		h264Source->m_formatCtx->streams[i]->time_base = bastTime;
-		if (ret < 0) {
-			printf("Failed to copy context from input to output stream codec context\n");
-			return;
-		}
-		out_stream->codec->codec_tag = 0;
-		if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
-			out_stream->codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
-	}
-	//Dump Format------------------  
-	av_dump_format(ofmt_ctx, 0, out_filename, 1);
-
-	if (!(ofmt->flags & AVFMT_NOFILE)) {
-		ret = avio_open(&ofmt_ctx->pb, out_filename, AVIO_FLAG_WRITE);
-		if (ret < 0) {
-			printf("Could not open output URL '%s'", out_filename);
-			return;
-		}
-	}
-
-
-	bool start = false;
 	float timestamp = 0.0;
 	int got_picture = false;
 	AVFrame	*m_curFrame = av_frame_alloc();
-	int64_t start_time = av_gettime();
-	int videoTimestamp = 0;
 	bool got_sps_pps = false;
 	while (!h264Source->m_stop && av_read_frame(h264Source->m_formatCtx, packet) >= 0){
 
-		//printf("Receive Packet, Packet Stream Index Is: %d, Frame Type: %d \n", packet->stream_index, packet->flags);
 		if (packet->stream_index == h264Source->m_videoIndex){
-			//if (packet->flags && !h264Source->m_metaData){
-			//
-			//}
+
 			int ret = avcodec_decode_video2(h264Source->m_videoCodecCtx, m_curFrame, &got_picture, packet);
+
 			if (got_picture && packet->flags == 1 && !got_sps_pps){
+				std::ofstream fout1("frame1.dat", std::ios::binary);
+				fout1.write((const char *)packet->data, packet->size);
+				fout1.close();
 				 //写文件头（Write file header）  
-				printf("%x\n", packet->data[100]);
 				AVBitStreamFilterContext* h264bsfc = av_bitstream_filter_init("h264_mp4toannexb");
 				av_bitstream_filter_filter(h264bsfc, h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec, NULL, &packet->data, &packet->size, packet->data, packet->size, 0);
-				//av_bitstream_filter_filter(h264bsfc, h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec, NULL, &packet->data, &packet->size, NULL, 0, 0);
 				if (packet->size <= 0){
 					av_free_packet(packet);
 					continue;
 				}
 				printf("%x\n", h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata);
-				//fwrite(h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata, h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata_size, 1, fp);
 				fetchSpsPps(h264Source, packet);
 				if (ret < 0) {
 					printf("Error occurred when opening output URL\n");
@@ -184,102 +126,15 @@ void jerky_h264_source_thread(void *args){
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata[8 + h264Source->m_metaData->nSpsLen + 1] = (h264Source->m_metaData->nPpsLen >> 8) && 0xFF;
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata[8 + h264Source->m_metaData->nSpsLen + 2] = (h264Source->m_metaData->nPpsLen >> 0) && 0xFF;
 					memcpy(h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata + 8 + h264Source->m_metaData->nSpsLen + 3, h264Source->m_metaData->Pps, h264Source->m_metaData->nPpsLen);
-
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata_size = 11 + h264Source->m_metaData->nPpsLen + h264Source->m_metaData->nSpsLen;
-				}
-				/*AVPacket *spsPPsPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
-				char * body = (char *)malloc(1024);
-				int i = 0;
-				body[i++] = 0x17;
-				body[i++] = 0x00;
-
-				body[i++] = 0x00;
-				body[i++] = 0x00;
-				body[i++] = 0x00;
-
-				//AVCDecoderConfigurationRecord
-				body[i++] = 0x01;
-				body[i++] = h264Source->m_metaData->Sps[1];
-				body[i++] = h264Source->m_metaData->Sps[2];
-				body[i++] = h264Source->m_metaData->Sps[3];
-				body[i++] = 0xff;
-
-				//sps
-				body[i++] = 0xe1;
-				body[i++] = (h264Source->m_metaData->nSpsLen >> 8) & 0xff;
-				body[i++] = h264Source->m_metaData->nSpsLen & 0xff;
-				memcpy(&body[i], h264Source->m_metaData->Sps, h264Source->m_metaData->nSpsLen);
-				i += h264Source->m_metaData->nSpsLen;
-
-				//pps
-				body[i++] = 0x01;
-				body[i++] = (h264Source->m_metaData->nPpsLen >> 8) & 0xff;
-				body[i++] = (h264Source->m_metaData->nPpsLen) & 0xff;
-				memcpy(&body[i], h264Source->m_metaData->Pps, h264Source->m_metaData->nPpsLen);
-				i += h264Source->m_metaData->nPpsLen;
-
-				spsPPsPacket->data = (uint8_t *)malloc(i + 4);
-				memcpy(spsPPsPacket->data + 4, body, i);
-				spsPPsPacket->data[0] = i >> 24 & 0xFF;
-				spsPPsPacket->data[1] = i >> 16 & 0xFF;
-				spsPPsPacket->data[2] = i >> 8 & 0xFF;
-				spsPPsPacket->data[3] = i >> 0 & 0xFF;
-
-
-				spsPPsPacket->dts = 0;
-				spsPPsPacket->flags = 1;
-				spsPPsPacket->pts = 0;
-				spsPPsPacket->size = i + 4;
-				spsPPsPacket->stream_index = h264Source->m_videoIndex;
-
-				ret = av_interleaved_write_frame(ofmt_ctx, packet);
-				if (ret < 0){
-					printf("av_interleaved_write_frame header errot\n");
-				}*/
-
-				//写文件头（Write file header）
-				ret = avformat_write_header(ofmt_ctx, NULL);
-				if (ret < 0) {
-					printf("Error occurred when opening output URL\n");
-					return;
 				}
 				av_free_packet(packet);				
 				got_sps_pps = true;
 				continue;
 			}
-
-			if (got_picture && packet->flags == 1 && start == false){
-				start = true;
-			}
-
-			if (start){
-				int videoPts = 0;
-				if (packet->stream_index == h264Source->m_videoIndex){
-					videoPts = videoTimestamp;
-					videoTimestamp += 40;
-
-					int64_t now_time = av_gettime() - start_time;
-					if (videoPts > now_time)
-						av_usleep(videoPts - now_time);
-
-				}
-
-				packet->pts = videoPts;
-				packet->dts = packet->pts;
-				packet->duration = 40;
-				packet->pos = -1;
-				ret = av_interleaved_write_frame(ofmt_ctx, packet);
-				timestamp += 40;
-			}
 		}
 		av_free_packet(packet);
 	}
-	//写文件尾（Write file trailer）
-	av_write_trailer(ofmt_ctx);
-	/* close output */
-	if (ofmt_ctx && !(ofmt->flags & AVFMT_NOFILE))
-		avio_close(ofmt_ctx->pb);
-	avformat_free_context(ofmt_ctx);
 }
 
 int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet){
@@ -398,6 +253,9 @@ int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packet
 	nalu.size = 0;
 	while (1)
 	{
+		if (naltail_pos >= packetSize){
+			break;
+		}
 		if (h264Source->nalhead_pos == NO_MORE_BUFFER_TO_READ)
 			return FALSE;
 		while (naltail_pos<packetSize)
