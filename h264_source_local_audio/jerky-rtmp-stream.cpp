@@ -4,6 +4,7 @@
 #include "util/dstr.h"
 #include <stdio.h>
 #include "net-if.h"
+#include <fstream>
 
 
 
@@ -194,4 +195,10 @@ static inline void free_packets(struct rtmp_stream *stream)
 		circlebuf_pop_front(&stream->packets, &packet, sizeof(packet));
 		obs_free_encoder_packet(&packet);
 	}
+}
+
+int main(int argc, char* argv[]){
+	
+	system("pause");
+	return 0;
 }
