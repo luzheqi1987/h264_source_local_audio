@@ -3,9 +3,10 @@
 #include "jerky-encoder.h"
 #include "util/dstr.h"
 #include <stdio.h>
-#include "net-if.h"
 #include <fstream>
-
+extern "C"{
+	#include "net-if.h"
+}
 
 
 static inline size_t num_buffered_packets(struct rtmp_stream *stream);
@@ -82,9 +83,7 @@ static int try_connect(struct rtmp_stream *stream)
 		memset(&stream->rtmp.m_bindIP, 0, sizeof(stream->rtmp.m_bindIP));
 	}
 	else {
-		bool success = netif_str_to_addr(&stream->rtmp.m_bindIP.addr,
-			&stream->rtmp.m_bindIP.addrLen,
-			stream->bind_ip.array);
+		bool success = netif_str_to_addr(&stream->rtmp.m_bindIP.addr, &stream->rtmp.m_bindIP.addrLen, stream->bind_ip.array);
 		if (success)
 			printf("Binding to IP\n");
 	}
@@ -198,7 +197,9 @@ static inline void free_packets(struct rtmp_stream *stream)
 }
 
 int main(int argc, char* argv[]){
-	
+	rtmp_stream *stream = (rtmp_stream *)rtmp_stream_create();
+	init_connect(stream);
+	try_connect(stream);
 	system("pause");
 	return 0;
 }

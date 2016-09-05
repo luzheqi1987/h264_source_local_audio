@@ -85,13 +85,13 @@
       <Optimization>Disabled</Optimization>
       <WarningLevel>Level3</WarningLevel>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG=1;_DEBUG=1;_DEBUG;UNICODE;_UNICODE;NO_CRYPTO;HAVE_OBSCONFIG_H;CMAKE_INTDIR="Debug";obs_outputs_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling />
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>Default</CompileAs>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;winmm.lib;..\deps\bin\avcodec.lib;..\deps\bin\avfilter.lib;..\deps\bin\avdevice.lib;..\deps\bin\avutil.lib;..\deps\bin\swscale.lib;..\deps\bin\avformat.lib;..\deps\bin\swresample.lib;..\deps\bin\w32-pthreadsd.lib;..\deps\bin\librtmpd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;ws2_32.lib;winmm.lib;Iphlpapi.lib;..\deps\bin\avcodec.lib;..\deps\bin\avfilter.lib;..\deps\bin\avdevice.lib;..\deps\bin\avutil.lib;..\deps\bin\swscale.lib;..\deps\bin\avformat.lib;..\deps\bin\swresample.lib;..\deps\bin\w32-pthreadsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -108,7 +108,17 @@
     <ClInclude Include="jerky-encoder.h" />
     <ClInclude Include="jerky-h264-source.h" />
     <ClInclude Include="jerky-rtmp-stream.h" />
-    <ClInclude Include="net-if.h" />
+    <ClInclude Include="rtmp\amf.h" />
+    <ClInclude Include="rtmp\bytes.h" />
+    <ClInclude Include="rtmp\cencode.h" />
+    <ClInclude Include="rtmp\dh.h" />
+    <ClInclude Include="rtmp\dhgroups.h" />
+    <ClInclude Include="rtmp\handshake.h" />
+    <ClInclude Include="rtmp\http.h" />
+    <ClInclude Include="rtmp\log.h" />
+    <ClInclude Include="rtmp\md5.h" />
+    <ClInclude Include="rtmp\rtmp.h" />
+    <ClInclude Include="rtmp\rtmp_sys.h" />
     <ClInclude Include="util\base.h" />
     <ClInclude Include="util\bmem.h" />
     <ClInclude Include="util\c99defs.h" />
@@ -126,6 +136,13 @@
     <ClCompile Include="jerky-h264-source.cpp" />
     <ClCompile Include="jerky-rtmp-stream.cpp" />
     <ClCompile Include="net-if.c" />
+    <ClCompile Include="rtmp\amf.c" />
+    <ClCompile Include="rtmp\cencode.c" />
+    <ClCompile Include="rtmp\hashswf.c" />
+    <ClCompile Include="rtmp\log.c" />
+    <ClCompile Include="rtmp\md5.c" />
+    <ClCompile Include="rtmp\parseurl.c" />
+    <ClCompile Include="rtmp\rtmp.c" />
     <ClCompile Include="util\base.c" />
     <ClCompile Include="util\bmem.c" />
     <ClCompile Include="util\dstr.c" />

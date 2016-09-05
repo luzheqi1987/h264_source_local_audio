@@ -1,10 +1,9 @@
 #pragma once
 
-
 #include <iostream>
 #include <inttypes.h>
-#include "librtmp/rtmp.h"
-#include "librtmp/log.h"
+#include "rtmp/rtmp.h"
+#include "rtmp/log.h"
 #include "util/bmem.h"
 #include "util/dstr.h"
 #include "jerky-circlebuf.h"

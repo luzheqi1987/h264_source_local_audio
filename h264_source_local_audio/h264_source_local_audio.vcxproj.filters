@@ -22,6 +22,12 @@
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{5e299f61-42f9-44e4-93dd-a762cc3b92fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\rtmp">
+      <UniqueIdentifier>{4222cd7e-b360-46f4-8ded-8d31e5b39247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rtmp">
+      <UniqueIdentifier>{935dd58c-fa15-4f95-a3ee-3cad6228af78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jerky-h264-source.h">
@@ -69,8 +75,38 @@
     <ClInclude Include="jerky-encoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="net-if.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="rtmp\amf.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\bytes.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\cencode.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\dh.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\dhgroups.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\handshake.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\http.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\log.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\md5.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\rtmp.h">
+      <Filter>Header Files\rtmp</Filter>
+    </ClInclude>
+    <ClInclude Include="rtmp\rtmp_sys.h">
+      <Filter>Header Files\rtmp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +145,27 @@
     </ClCompile>
     <ClCompile Include="jerky-encoder.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\amf.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\cencode.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\hashswf.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\log.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\md5.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\parseurl.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\rtmp.c">
+      <Filter>Source Files\rtmp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
