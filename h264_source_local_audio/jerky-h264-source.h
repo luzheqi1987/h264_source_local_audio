@@ -1,5 +1,7 @@
 #pragma once
 
+#include "jerky-rtmp-stream.h"
+
 extern "C"{
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
@@ -58,15 +60,15 @@ typedef struct _RTMPMetadata
 
 struct jerky_h264_source
 {
-	unsigned int m_videoIndex;
-	int nalhead_pos;
-	bool m_stop;
-	char * m_streamUrl;
-	RTMPMetadata * m_metaData;
-	AVFormatContext * m_formatCtx;
-	AVCodecContext	*m_videoCodecCtx;
-	AVCodec			*m_videoCodec;
-
+	unsigned int		m_videoIndex;
+	int					nalhead_pos;
+	bool				m_stop;
+	char *				m_streamUrl;
+	RTMPMetadata *		m_metaData;
+	AVFormatContext *	m_formatCtx;
+	AVCodecContext	*	m_videoCodecCtx;
+	AVCodec			*	m_videoCodec;
+	rtmp_stream *		m_rtmpStream;
 };
 
 

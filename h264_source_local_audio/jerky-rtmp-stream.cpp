@@ -37,8 +37,7 @@ static bool init_connect(struct rtmp_stream *stream)
 	stream->total_bytes_sent = 0;
 	stream->dropped_frames = 0;
 
-	dstr_copy(&stream->path, "rtmp://192.168.1.158/live/test");
-	dstr_copy(&stream->key, "test");
+	dstr_copy(&stream->path, "rtmp://gs.push.rgbvr.com/rgbvr/111111");
 	dstr_copy(&stream->username, "");
 	dstr_copy(&stream->password, "");
 	dstr_depad(&stream->path);
@@ -63,7 +62,7 @@ static int try_connect(struct rtmp_stream *stream)
 		return -1;
 	}
 
-	printf("Connecting to RTMP URL %s...", stream->path.array);
+	printf("Connecting to RTMP URL %s...\n", stream->path.array);
 
 	memset(&stream->rtmp.Link, 0, sizeof(stream->rtmp.Link));
 	if (!RTMP_SetupURL(&stream->rtmp, stream->path.array))
@@ -172,7 +171,7 @@ static void win32_log_interface_type(struct rtmp_stream *stream)
 				type = other.array;
 			}
 
-			printf("Interface: %s (%s, %lu mbps)", row.bDescr, type,
+			printf("Interface: %s (%s, %lu mbps)\n", row.bDescr, type,
 				speed);
 
 			dstr_free(&other);
@@ -197,6 +196,8 @@ static inline void free_packets(struct rtmp_stream *stream)
 }
 
 int main(int argc, char* argv[]){
+	WSADATA wsad;
+	WSAStartup(MAKEWORD(2, 2), &wsad);
 	rtmp_stream *stream = (rtmp_stream *)rtmp_stream_create();
 	init_connect(stream);
 	try_connect(stream);
