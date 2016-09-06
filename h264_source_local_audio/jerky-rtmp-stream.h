@@ -33,3 +33,13 @@ struct rtmp_stream {
 	int              dropped_frames;
 	RTMP             rtmp;
 };
+
+inline size_t num_buffered_packets(struct rtmp_stream *stream);
+inline void set_rtmp_dstr(AVal *val, struct dstr *str);
+#ifdef _WIN32
+void win32_log_interface_type(struct rtmp_stream *stream);
+#endif
+inline void free_packets(struct rtmp_stream *stream);
+void *rtmp_stream_create();
+bool init_connect(struct rtmp_stream *stream);
+int try_connect(struct rtmp_stream *stream);

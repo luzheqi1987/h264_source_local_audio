@@ -8,13 +8,7 @@ extern "C"{
 	#include "net-if.h"
 }
 
-
-static inline size_t num_buffered_packets(struct rtmp_stream *stream);
-static inline void set_rtmp_dstr(AVal *val, struct dstr *str);
-static void win32_log_interface_type(struct rtmp_stream *stream);
-static inline void free_packets(struct rtmp_stream *stream);
-
-static void *rtmp_stream_create()
+void *rtmp_stream_create()
 {
 	struct rtmp_stream *stream = (rtmp_stream *) bzalloc (sizeof(struct rtmp_stream));
 
@@ -25,7 +19,7 @@ static void *rtmp_stream_create()
 	return stream;
 }
 
-static bool init_connect(struct rtmp_stream *stream)
+bool init_connect(struct rtmp_stream *stream)
 {
 	const char *bind_ip;
 	int64_t drop_p;
@@ -55,7 +49,7 @@ static bool init_connect(struct rtmp_stream *stream)
 	return true;
 }
 
-static int try_connect(struct rtmp_stream *stream)
+int try_connect(struct rtmp_stream *stream)
 {
 	if (dstr_is_empty(&stream->path)) {
 		printf("URL is empty\n");
@@ -107,12 +101,12 @@ static int try_connect(struct rtmp_stream *stream)
 }
 
 
-static inline size_t num_buffered_packets(struct rtmp_stream *stream)
+inline size_t num_buffered_packets(struct rtmp_stream *stream)
 {
 	return stream->packets.size / sizeof(struct encoder_packet);
 }
 
-static inline void set_rtmp_dstr(AVal *val, struct dstr *str)
+inline void set_rtmp_dstr(AVal *val, struct dstr *str)
 {
 	bool valid = !dstr_is_empty(str);
 	val->av_val = valid ? str->array : NULL;
@@ -122,7 +116,7 @@ static inline void set_rtmp_dstr(AVal *val, struct dstr *str)
 
 
 #ifdef _WIN32
-static void win32_log_interface_type(struct rtmp_stream *stream)
+void win32_log_interface_type(struct rtmp_stream *stream)
 {
 	RTMP *rtmp = &stream->rtmp;
 	MIB_IPFORWARDROW route;
@@ -180,7 +174,7 @@ static void win32_log_interface_type(struct rtmp_stream *stream)
 }
 #endif
 
-static inline void free_packets(struct rtmp_stream *stream)
+inline void free_packets(struct rtmp_stream *stream)
 {
 	size_t num_packets;
 
@@ -193,14 +187,4 @@ static inline void free_packets(struct rtmp_stream *stream)
 		circlebuf_pop_front(&stream->packets, &packet, sizeof(packet));
 		obs_free_encoder_packet(&packet);
 	}
-}
-
-int main(int argc, char* argv[]){
-	WSADATA wsad;
-	WSAStartup(MAKEWORD(2, 2), &wsad);
-	rtmp_stream *stream = (rtmp_stream *)rtmp_stream_create();
-	init_connect(stream);
-	try_connect(stream);
-	system("pause");
-	return 0;
 }
