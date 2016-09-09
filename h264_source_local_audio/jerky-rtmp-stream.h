@@ -8,6 +8,37 @@
 #include "util/dstr.h"
 #include "jerky-circlebuf.h"
 #include "w32-pthreads/pthread.h"
+#include "util/array-serializer.h"
+
+
+#define Packet_Type_Audio 0x08
+#define Packet_Type_Video 0x09
+
+#define Audio_Type_AAC 0x01
+#define Audio_Type_MP3 0x02
+
+#define Video_Type_H264 0x17
+
+struct jerky_av_packet
+{
+	serializer data;
+	char pktType;
+	uint64_t pts;
+	uint64_t dts;
+	bool has_encoded;
+	bool has_captured;
+	bool is_key;
+};
+
+struct jerky_audio_packet : jerky_av_packet
+{
+	char audioType;
+};
+
+struct jerky_video_packet : jerky_av_packet
+{
+	char videoType;
+};
 
 struct rtmp_stream {
 	struct jerky_circlebuf packets;

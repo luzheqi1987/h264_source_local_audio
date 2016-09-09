@@ -108,6 +108,12 @@
     <ClInclude Include="rtmp\rtmp_sys.h">
       <Filter>Header Files\rtmp</Filter>
     </ClInclude>
+    <ClInclude Include="util\array-serializer.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\serializer.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="jerky-h264-source.cpp">
@@ -166,6 +172,9 @@
     </ClCompile>
     <ClCompile Include="rtmp\rtmp.c">
       <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="util\array-serializer.c">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

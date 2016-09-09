@@ -119,6 +119,7 @@
     <ClInclude Include="rtmp\md5.h" />
     <ClInclude Include="rtmp\rtmp.h" />
     <ClInclude Include="rtmp\rtmp_sys.h" />
+    <ClInclude Include="util\array-serializer.h" />
     <ClInclude Include="util\base.h" />
     <ClInclude Include="util\bmem.h" />
     <ClInclude Include="util\c99defs.h" />
@@ -126,6 +127,7 @@
     <ClInclude Include="util\dstr.h" />
     <ClInclude Include="util\lexer.h" />
     <ClInclude Include="util\platform.h" />
+    <ClInclude Include="util\serializer.h" />
     <ClInclude Include="util\threading-windows.h" />
     <ClInclude Include="util\threading.h" />
     <ClInclude Include="util\utf8.h" />
@@ -143,6 +145,7 @@
     <ClCompile Include="rtmp\md5.c" />
     <ClCompile Include="rtmp\parseurl.c" />
     <ClCompile Include="rtmp\rtmp.c" />
+    <ClCompile Include="util\array-serializer.c" />
     <ClCompile Include="util\base.c" />
     <ClCompile Include="util\bmem.c" />
     <ClCompile Include="util\dstr.c" />
