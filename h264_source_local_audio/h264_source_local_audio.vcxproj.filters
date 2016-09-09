@@ -173,8 +173,13 @@
     <ClCompile Include="rtmp\rtmp.c">
       <Filter>Source Files\rtmp</Filter>
     </ClCompile>
+<<<<<<< HEAD
     <ClCompile Include="util\array-serializer.c">
       <Filter>Source Files\util</Filter>
+=======
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+>>>>>>> 9d447ff01409c598f692b43e5fcbe97e51be96fd
     </ClCompile>
   </ItemGroup>
 </Project>

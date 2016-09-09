@@ -137,6 +137,7 @@
     <ClCompile Include="jerky-encoder.cpp" />
     <ClCompile Include="jerky-h264-source.cpp" />
     <ClCompile Include="jerky-rtmp-stream.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="net-if.c" />
     <ClCompile Include="rtmp\amf.c" />
     <ClCompile Include="rtmp\cencode.c" />

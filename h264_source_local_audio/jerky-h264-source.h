@@ -72,6 +72,11 @@ struct jerky_h264_source
 };
 
 
+
+struct jerky_h264_source* jerky_h264_source_init();
+int find_video_index(jerky_h264_source* h264Source);
+int video_codec_init(jerky_h264_source* h264Source);
+void jerky_h264_source_thread(void *args);
 int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData);
 int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData);
 int find_video_index(jerky_h264_source* h264Source);
