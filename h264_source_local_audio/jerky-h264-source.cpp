@@ -105,12 +105,35 @@ void jerky_h264_source_thread(void *args){
 					continue;
 				}
 				printf("%x\n", h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata);
+
+				jerky_video_packet * videoHeadPacket = (jerky_video_packet *)malloc(sizeof(jerky_video_packet *));
+				videoHeadPacket->dts = 0;
+				videoHeadPacket->pts = 0;
+				s_w8(&videoHeadPacket->data, 0x17);
+
+				s_w8(&videoHeadPacket->data, 0x00);
+				s_w8(&videoHeadPacket->data, 0x00);
+				s_w8(&videoHeadPacket->data, 0x00);
+				s_w8(&videoHeadPacket->data, 0x00);
+
+				/*AVCDecoderConfigurationRecord*/
+				s_w8(&videoHeadPacket->data, 0x01);
+				s_w8(&videoHeadPacket->data, h264Source->m_metaData->Sps[1]);
+				s_w8(&videoHeadPacket->data, h264Source->m_metaData->Sps[2]);
+				s_w8(&videoHeadPacket->data, h264Source->m_metaData->Sps[3]);
+				s_w8(&videoHeadPacket->data, 0xff);
+
+				/*sps*/
+				s_w8(&videoHeadPacket->data, 0xe1); 
+				s_wb16(&videoHeadPacket->data, h264Source->m_metaData->nSpsLen);
+				s_write(&videoHeadPacket->data, h264Source->m_metaData->Sps, h264Source->m_metaData->nSpsLen);
+
+				/*pps*/
+				s_w8(&videoHeadPacket->data, 0x01);
+				s_wb16(&videoHeadPacket->data, h264Source->m_metaData->nPpsLen);
+				s_write(&videoHeadPacket->data, h264Source->m_metaData->Pps, h264Source->m_metaData->nPpsLen);
+
 				fetchSpsPps(h264Source, packet);
-				if (ret < 0) {
-					printf("Error occurred when opening output URL\n");
-					av_free_packet(packet);
-					continue;
-				}
 				if (!h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata){
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata = (uint8_t *)malloc((11 + h264Source->m_metaData->nPpsLen + h264Source->m_metaData->nSpsLen) * sizeof(uint8_t));
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata[0] = 0x01;
