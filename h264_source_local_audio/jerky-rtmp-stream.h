@@ -74,5 +74,5 @@ void win32_log_interface_type(struct rtmp_stream *stream);
 #endif
 inline void free_packets(struct rtmp_stream *stream);
 void *rtmp_stream_create();
-bool init_connect(struct rtmp_stream *stream);
+bool init_connect(struct rtmp_stream *stream, const char * url);
 int try_connect(struct rtmp_stream *stream);

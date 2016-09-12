@@ -9,7 +9,7 @@
 
 unsigned char* m_tmp_nalu_data = (unsigned char*)malloc(BUFFER_SIZE);
 
-struct jerky_h264_source* jerky_h264_source_init()
+struct jerky_h264_source* jerky_h264_source_init(const char* url)
 {
 
 	av_register_all();
@@ -17,7 +17,7 @@ struct jerky_h264_source* jerky_h264_source_init()
 	struct jerky_h264_source *h264Source = (jerky_h264_source *)malloc(sizeof(h264Source));
 	h264Source = (jerky_h264_source *)malloc(sizeof(jerky_h264_source));
 	h264Source->m_formatCtx = avformat_alloc_context();
-	h264Source->m_streamUrl = "rtmp://gs.push.rgbvr.com/rgbvr/123456";
+	h264Source->m_streamUrl = (char *)url;
 	h264Source->m_stop = false;
 	h264Source->m_videoIndex = 0;
 	h264Source->m_metaData = NULL;

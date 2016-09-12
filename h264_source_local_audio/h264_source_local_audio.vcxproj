@@ -53,7 +53,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>D:\Qt551Win64\5.5\msvc2013_64\lib;$(LibraryPath)</LibraryPath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <IncludePath>D:\Qt551Win64\5.5\msvc2013_64\include;$(IncludePath)</IncludePath>
+    <LinkIncremental>true</LinkIncremental>
+    <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -86,13 +92,18 @@
       <WarningLevel>Level3</WarningLevel>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG=1;_DEBUG=1;_DEBUG;UNICODE;_UNICODE;NO_CRYPTO;HAVE_OBSCONFIG_H;CMAKE_INTDIR="Debug";obs_outputs_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ExceptionHandling />
+      <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>Default</CompileAs>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;ws2_32.lib;winmm.lib;Iphlpapi.lib;..\deps\bin\avcodec.lib;..\deps\bin\avfilter.lib;..\deps\bin\avdevice.lib;..\deps\bin\avutil.lib;..\deps\bin\swscale.lib;..\deps\bin\avformat.lib;..\deps\bin\swresample.lib;..\deps\bin\w32-pthreadsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5PlatformSupportd.lib;Qt5WinExtrasd.lib;Qt5Multimediad.lib;Qt5MultimediaWidgetsd.lib;qtmaind.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;ws2_32.lib;winmm.lib;Iphlpapi.lib;..\deps\bin\avcodec.lib;..\deps\bin\avfilter.lib;..\deps\bin\avdevice.lib;..\deps\bin\avutil.lib;..\deps\bin\swscale.lib;..\deps\bin\avformat.lib;..\deps\bin\swresample.lib;..\deps\bin\w32-pthreadsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -108,6 +119,30 @@
     <ClInclude Include="jerky-encoder.h" />
     <ClInclude Include="jerky-h264-source.h" />
     <ClInclude Include="jerky-rtmp-stream.h" />
+    <CustomBuild Include="jerky_main_window.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+if  not  exist ..\x64\Debug\h264_source_local_audio.exe  (moc.exe jerky_main_window.h -o moc_jerky_main_window.h)
+for /f "tokens=1,2,3* delims= " %%a in ('dir /tc jerky_main_window.h ^| findstr /ic:"jerky_main_window"') do (
+	set oldtime=%%a %%b
+	)
+for /f "tokens=1,2,3* delims= " %%x in ('dir /tc ..\x64\Debug\h264_source_local_audio.exe ^| findstr /ic:"h264_source_local_audio.exe"') do (
+	set newtime=%%x %%y
+	)
+if "%oldtime%" gtr "%newtime%" (moc.exe jerky_main_window.h -o moc_jerky_main_window.h)
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+
+
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">moc_jerky_main_window.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">moc.exe;jerky_main_window.h;jerky_main_window.cpp</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="rtmp\amf.h" />
     <ClInclude Include="rtmp\bytes.h" />
     <ClInclude Include="rtmp\cencode.h" />
@@ -119,6 +154,8 @@
     <ClInclude Include="rtmp\md5.h" />
     <ClInclude Include="rtmp\rtmp.h" />
     <ClInclude Include="rtmp\rtmp_sys.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="ui_jerky_main_window.h" />
     <ClInclude Include="util\array-serializer.h" />
     <ClInclude Include="util\base.h" />
     <ClInclude Include="util\bmem.h" />
@@ -137,6 +174,7 @@
     <ClCompile Include="jerky-encoder.cpp" />
     <ClCompile Include="jerky-h264-source.cpp" />
     <ClCompile Include="jerky-rtmp-stream.cpp" />
+    <ClCompile Include="jerky_main_window.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="net-if.c" />
     <ClCompile Include="rtmp\amf.c" />
@@ -155,6 +193,34 @@
     <ClCompile Include="util\platform.c" />
     <ClCompile Include="util\threading-windows.c" />
     <ClCompile Include="util\utf8.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="h264_source_local_audio.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="jerky_main.ui">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+if  not  exist ..\x64\Debug\h264_source_local_audio.exe  (uic.exe jerky_main.ui -o ui_jerky_main_window.h)
+for /f "tokens=1,2,3* delims= " %%a in ('dir /tc ui_jerky_main_window.h ^| findstr /ic:"ui_jerky_main_window"') do (
+	set oldtime=%%a %%b
+	)
+for /f "tokens=1,2,3* delims= " %%x in ('dir /tc ..\x64\Debug\h264_source_local_audio.exe ^| findstr /ic:"h264_source_local_audio.exe"') do (
+	set newtime=%%x %%y
+	)
+if "%oldtime%" gtr "%newtime%" (uic.exe jerky_main.ui -o ui_jerky_main_window.h)
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ui_jerky_main_window.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">uic.exe;jerky_main.ui;%(AdditionalInputs)</AdditionalInputs>
+      <TreatOutputAsContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatOutputAsContent>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,1 @@
+#include "moc_jerky_main_window.h"

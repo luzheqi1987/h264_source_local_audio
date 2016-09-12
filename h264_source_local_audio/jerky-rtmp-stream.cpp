@@ -19,7 +19,7 @@ void *rtmp_stream_create()
 	return stream;
 }
 
-bool init_connect(struct rtmp_stream *stream)
+bool init_connect(struct rtmp_stream *stream, const char * url)
 {
 	const char *bind_ip;
 	int64_t drop_p;
@@ -31,7 +31,7 @@ bool init_connect(struct rtmp_stream *stream)
 	stream->total_bytes_sent = 0;
 	stream->dropped_frames = 0;
 
-	dstr_copy(&stream->path, "rtmp://gs.push.rgbvr.com/rgbvr/111111");
+	dstr_copy(&stream->path, url);
 	dstr_copy(&stream->username, "");
 	dstr_copy(&stream->password, "");
 	dstr_depad(&stream->path);
