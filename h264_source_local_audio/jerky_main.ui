@@ -75,6 +75,9 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
     <property name="text">
      <string>rtmp://192.168.1.158/live/123456</string>
     </property>

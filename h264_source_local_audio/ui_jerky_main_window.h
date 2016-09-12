@@ -59,6 +59,7 @@ public:
         openUrl = new QLineEdit(centralwidget);
         openUrl->setObjectName(QStringLiteral("openUrl"));
         openUrl->setGeometry(QRect(130, 40, 261, 20));
+        openUrl->setCursor(QCursor(Qt::ArrowCursor));
         pushUrl = new QLineEdit(centralwidget);
         pushUrl->setObjectName(QStringLiteral("pushUrl"));
         pushUrl->setGeometry(QRect(130, 76, 261, 20));
