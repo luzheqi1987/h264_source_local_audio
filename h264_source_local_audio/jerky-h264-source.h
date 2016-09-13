@@ -69,6 +69,8 @@ struct jerky_h264_source
 	AVCodecContext	*	m_videoCodecCtx;
 	AVCodec			*	m_videoCodec;
 	rtmp_stream *		m_rtmpStream;
+	bool				startSend;
+	bool				firstPush;
 };
 
 
@@ -77,8 +79,8 @@ struct jerky_h264_source* jerky_h264_source_init(const char* url);
 int find_video_index(jerky_h264_source* h264Source);
 int video_codec_init(jerky_h264_source* h264Source);
 void jerky_h264_source_thread(void *args);
-int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData);
-int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData);
+int ReadFirstNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigned char *packetData);
+int ReadOneNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigned char *packetData);
 int find_video_index(jerky_h264_source* h264Source);
 int video_codec_init(jerky_h264_source* h264Source);
 int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet);

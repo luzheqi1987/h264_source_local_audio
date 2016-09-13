@@ -1,1 +1,3 @@
-#include "moc_jerky_main_window.h"
+
+#include <iostream>
+#include <stdio.h>

@@ -1,5 +1,6 @@
 #include "jerky_main_window.h"
 #include "winnt.h"
+#include <thread>
 
 JerkyMainWindow::JerkyMainWindow(QWidget *parent) : QMainWindow(parent),
 													h264Source(NULL),
@@ -15,6 +16,8 @@ void JerkyMainWindow::startStream() {
 	jerky_h264_source* h264Source = jerky_h264_source_init(openUrl->text().toStdString().c_str());
 	startStreamBtn->setText(QStringLiteral("ÒÑ´ò¿ª"));
 	startStreamBtn->setEnabled(false);
+	std::thread h264SourceThread(jerky_h264_source_thread, h264Source);
+	h264SourceThread.join();
 }
 
 

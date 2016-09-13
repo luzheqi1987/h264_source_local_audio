@@ -21,6 +21,16 @@
 
 struct jerky_av_packet
 {
+	jerky_av_packet(char type)
+		: pktType(type)
+		, pts(0)
+		, dts(0)
+		, is_key(false)
+		, has_encoded(false)
+		, has_captured(false)
+	{
+
+	}
 	serializer data;
 	char pktType;
 	uint64_t pts;
@@ -32,11 +42,24 @@ struct jerky_av_packet
 
 struct jerky_audio_packet : jerky_av_packet
 {
+	jerky_audio_packet(char at)
+		: jerky_av_packet(Packet_Type_Audio)
+		, audioType(at)
+	{
+	}
+	~jerky_audio_packet() {}
 	char audioType;
 };
 
 struct jerky_video_packet : jerky_av_packet
 {
+	jerky_video_packet(char vt)
+		: jerky_av_packet(Packet_Type_Video)
+		, videoType(vt)
+	{
+
+	}
+	~jerky_video_packet() {}
 	char videoType;
 };
 

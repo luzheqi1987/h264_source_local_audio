@@ -22,6 +22,8 @@ struct jerky_h264_source* jerky_h264_source_init(const char* url)
 	h264Source->m_videoIndex = 0;
 	h264Source->m_metaData = NULL;
 	h264Source->nalhead_pos = 0;
+	h264Source->startSend = false;
+	h264Source->firstPush = true;
 
 	AVDictionary* options = NULL;
 	std::string strStreamUrl = h264Source->m_streamUrl;
@@ -93,6 +95,62 @@ void jerky_h264_source_thread(void *args){
 	while (!h264Source->m_stop && av_read_frame(h264Source->m_formatCtx, packet) >= 0){
 
 		if (packet->stream_index == h264Source->m_videoIndex){
+			if (h264Source->startSend && (!h264Source->firstPush || packet->flags == 1 && !got_sps_pps)){
+				if (h264Source->firstPush){
+					h264Source->firstPush = false;
+				}
+
+				jerky_video_packet * avPacket = new jerky_video_packet(Video_Type_H264);
+				struct array_output_data data;
+				array_output_serializer_init(&avPacket->data, &data);
+
+				if (packet->flags == 1){
+					avPacket->is_key = true;
+				}
+				else{
+					avPacket->is_key = false;
+				}
+				unsigned char frameType;
+				if (packet->flags == 1) {
+					frameType = 0x17;// 1:Iframe  7:AVC
+				}
+				else {
+					frameType = 0x27;// 2:Pframe  7:AVC
+				}
+				//int now = RTMP_GetTime();
+
+				s_w8(&avPacket->data, frameType);
+
+				s_w8(&avPacket->data, 0x01);// AVC NALU
+				s_w8(&avPacket->data, 0x00);
+				s_w8(&avPacket->data, 0x00);
+				s_w8(&avPacket->data, 0x00);
+
+				// NALU size
+				int extraLength = 4;
+				NaluUnit naluUnit;
+				int nalhead_pos = 0;
+				bool result = ReadFirstNaluFromBuf(naluUnit, nalhead_pos, packet->size, packet->data);
+				if (result && naluUnit.type == 7){
+					extraLength += 4 + naluUnit.size;
+					// 读取PPS帧
+					result = ReadOneNaluFromBuf(naluUnit, nalhead_pos, packet->size, packet->data);
+					if (result && naluUnit.type == 8){
+						extraLength += 4 + naluUnit.size;
+					}
+				}
+				s_wb32(&avPacket->data, packet->size - extraLength);
+				s_write(&avPacket->data, (const char*)packet->data + extraLength, packet->size - extraLength);
+				avPacket->has_captured = true;
+				avPacket->has_encoded = true;
+
+				//XhxAVQueue::instance()->update_packet(bleAVPacket);
+				avPacket->pts = packet->pts;
+				avPacket->pts = avPacket->dts;
+
+				//XhxAVQueue::instance()->enqueue(bleAVPacket);
+			}
+
 
 			int ret = avcodec_decode_video2(h264Source->m_videoCodecCtx, m_curFrame, &got_picture, packet);
 
@@ -105,10 +163,15 @@ void jerky_h264_source_thread(void *args){
 					continue;
 				}
 				printf("%x\n", h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata);
+				fetchSpsPps(h264Source, packet);
 
 				jerky_video_packet * videoHeadPacket = (jerky_video_packet *)malloc(sizeof(jerky_video_packet *));
 				videoHeadPacket->dts = 0;
 				videoHeadPacket->pts = 0;
+
+				struct array_output_data data;
+				array_output_serializer_init(&videoHeadPacket->data, &data);
+
 				s_w8(&videoHeadPacket->data, 0x17);
 
 				s_w8(&videoHeadPacket->data, 0x00);
@@ -132,8 +195,6 @@ void jerky_h264_source_thread(void *args){
 				s_w8(&videoHeadPacket->data, 0x01);
 				s_wb16(&videoHeadPacket->data, h264Source->m_metaData->nPpsLen);
 				s_write(&videoHeadPacket->data, h264Source->m_metaData->Pps, h264Source->m_metaData->nPpsLen);
-
-				fetchSpsPps(h264Source, packet);
 				if (!h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata){
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata = (uint8_t *)malloc((11 + h264Source->m_metaData->nPpsLen + h264Source->m_metaData->nSpsLen) * sizeof(uint8_t));
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata[0] = 0x01;
@@ -172,7 +233,7 @@ int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet){
 		return FALSE;
 	}
 
-	bool result = ReadFirstNaluFromBuf(h264Source, naluUnit, packetSize, packetData);
+	bool result = ReadFirstNaluFromBuf(naluUnit, h264Source->nalhead_pos, packetSize, packetData);
 	if (!result || naluUnit.type != 7){
 		return FALSE;
 	}
@@ -182,7 +243,7 @@ int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet){
 	memcpy(h264Source->m_metaData->Sps, naluUnit.data, naluUnit.size);
 
 	// 读取PPS帧
-	result = ReadOneNaluFromBuf(h264Source, naluUnit, packetSize, packetData);
+	result = ReadOneNaluFromBuf(naluUnit, h264Source->nalhead_pos, packetSize, packetData);
 	if (!result || naluUnit.type != 8){
 		return FALSE;
 	}
@@ -205,24 +266,24 @@ int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet){
 *					返回值：成功读取的内存大小
 * @成功则返回 1 , 失败则返回0
 */
-int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData){
-	int naltail_pos = h264Source->nalhead_pos;
+int ReadFirstNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigned char *packetData){
+	int naltail_pos = nalhead_pos;
 
 	memset(m_tmp_nalu_data, 0, BUFFER_SIZE);
-	while (h264Source->nalhead_pos < packetSize)
+	while (nalhead_pos < packetSize)
 	{
 		//搜索NAL头部
-		if (packetData[h264Source->nalhead_pos++] == 0x00 &&
-			packetData[h264Source->nalhead_pos++] == 0x00)
+		if (packetData[nalhead_pos++] == 0x00 &&
+			packetData[nalhead_pos++] == 0x00)
 		{
-			if (packetData[h264Source->nalhead_pos++] == 0x01)
+			if (packetData[nalhead_pos++] == 0x01)
 				goto gotnal_head;
 			else
 			{
 				//判断0000 0001
-				h264Source->nalhead_pos--;
-				if (packetData[h264Source->nalhead_pos++] == 0x00 &&
-					packetData[h264Source->nalhead_pos++] == 0x01)
+				nalhead_pos--;
+				if (packetData[nalhead_pos++] == 0x00 &&
+					packetData[nalhead_pos++] == 0x01)
 					goto gotnal_head;
 				else
 					continue;
@@ -234,7 +295,7 @@ int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int pack
 		//搜索NAL尾部，也是下个NALU的头部
 	gotnal_head:
 		//正常情况下NALU在一个packetData内部
-		naltail_pos = h264Source->nalhead_pos;
+		naltail_pos = nalhead_pos;
 		while (naltail_pos < packetSize)
 		{
 			if (packetData[naltail_pos++] == 0x00 &&
@@ -242,7 +303,7 @@ int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int pack
 			{
 				if (packetData[naltail_pos++] == 0x01)
 				{
-					nalu.size = (naltail_pos - 3) - h264Source->nalhead_pos;
+					nalu.size = (naltail_pos - 3) - nalhead_pos;
 					break;
 				}
 				else
@@ -251,25 +312,25 @@ int ReadFirstNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int pack
 					if (packetData[naltail_pos++] == 0x00 &&
 						packetData[naltail_pos++] == 0x01)
 					{
-						nalu.size = (naltail_pos - 4) - h264Source->nalhead_pos;
+						nalu.size = (naltail_pos - 4) - nalhead_pos;
 						break;
 					}
 				}
 			}
 		}
 
-		nalu.type = packetData[h264Source->nalhead_pos] & 0x1f;
-		memcpy(m_tmp_nalu_data, packetData + h264Source->nalhead_pos, nalu.size);
+		nalu.type = packetData[nalhead_pos] & 0x1f;
+		memcpy(m_tmp_nalu_data, packetData + nalhead_pos, nalu.size);
 		nalu.data = m_tmp_nalu_data;
-		h264Source->nalhead_pos = naltail_pos;
+		nalhead_pos = naltail_pos;
 		return TRUE;
 	}
 }
 
-int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packetSize, unsigned char *packetData)
+int ReadOneNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigned char *packetData)
 {
 
-	int naltail_pos = h264Source->nalhead_pos;
+	int naltail_pos = nalhead_pos;
 	int ret;
 	int nalustart;//nal的开始标识符是几个00
 	memset(m_tmp_nalu_data, 0, BUFFER_SIZE);
@@ -279,7 +340,7 @@ int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packet
 		if (naltail_pos >= packetSize){
 			break;
 		}
-		if (h264Source->nalhead_pos == NO_MORE_BUFFER_TO_READ)
+		if (nalhead_pos == NO_MORE_BUFFER_TO_READ)
 			return FALSE;
 		while (naltail_pos < packetSize)
 		{
@@ -311,23 +372,23 @@ int ReadOneNaluFromBuf(jerky_h264_source* h264Source, NaluUnit &nalu, int packet
 
 		gotnal:
 			// 整个NALU不在packetData内
-			if (h264Source->nalhead_pos == GOT_A_NAL_CROSS_BUFFER || h264Source->nalhead_pos == GOT_A_NAL_INCLUDE_A_BUFFER)
+			if (nalhead_pos == GOT_A_NAL_CROSS_BUFFER || nalhead_pos == GOT_A_NAL_INCLUDE_A_BUFFER)
 			{
 				return FALSE;
 			}
 			// 整个NALU在packetData内
 			else
 			{
-				nalu.type = packetData[h264Source->nalhead_pos] & 0x1f;
-				nalu.size = naltail_pos - h264Source->nalhead_pos - nalustart;
+				nalu.type = packetData[nalhead_pos] & 0x1f;
+				nalu.size = naltail_pos - nalhead_pos - nalustart;
 				if (nalu.type == 0x06)
 				{
-					h264Source->nalhead_pos = naltail_pos;
+					nalhead_pos = naltail_pos;
 					continue;
 				}
-				memcpy(m_tmp_nalu_data, packetData + h264Source->nalhead_pos, nalu.size);
+				memcpy(m_tmp_nalu_data, packetData + nalhead_pos, nalu.size);
 				nalu.data = m_tmp_nalu_data;
-				h264Source->nalhead_pos = naltail_pos;
+				nalhead_pos = naltail_pos;
 				return TRUE;
 			}
 		}
