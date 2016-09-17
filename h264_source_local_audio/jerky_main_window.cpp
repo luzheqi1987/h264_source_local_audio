@@ -6,6 +6,7 @@ JerkyMainWindow::JerkyMainWindow(QWidget *parent) : QMainWindow(parent),
 													h264Source(NULL),
 													stream(NULL){
 	setupUi(this);
+	connect(startStreamBtn, SIGNAL(clicked()), this, SLOT(startStream()));
 }
 
 JerkyMainWindow::~JerkyMainWindow(){
@@ -13,11 +14,10 @@ JerkyMainWindow::~JerkyMainWindow(){
 
 
 void JerkyMainWindow::startStream() {
-	jerky_h264_source* h264Source = jerky_h264_source_init(openUrl->text().toStdString().c_str());
+	h264Source = jerky_h264_source_init(openUrl->text().toStdString().c_str());
+	startCapture(h264Source);
 	startStreamBtn->setText(QStringLiteral("ÒÑ´ò¿ª"));
 	startStreamBtn->setEnabled(false);
-	std::thread h264SourceThread(jerky_h264_source_thread, h264Source);
-	h264SourceThread.join();
 }
 
 
@@ -25,8 +25,9 @@ void JerkyMainWindow::startStream() {
 void JerkyMainWindow::pushStream() {
 	WSADATA wsad;
 	WSAStartup(MAKEWORD(2, 2), &wsad);
-	rtmp_stream *stream = (rtmp_stream *)rtmp_stream_create();
+	stream = (rtmp_stream *)rtmp_stream_create();
 	h264Source->m_rtmpStream = stream;
 	init_connect(stream, pushUrl->text().toStdString().c_str());
 	try_connect(stream);
+	h264Source->startSend = true;
 }

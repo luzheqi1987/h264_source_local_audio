@@ -1,5 +1,8 @@
 #include "jerky-encoder.h"
+
+extern "C"{
 #include "util/bmem.h"
+}
 
 void obs_free_encoder_packet(struct encoder_packet *packet)
 {

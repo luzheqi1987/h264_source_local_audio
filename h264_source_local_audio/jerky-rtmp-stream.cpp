@@ -1,20 +1,32 @@
 #include "jerky-rtmp-stream.h"
-#include "util/bmem.h"
 #include "jerky-encoder.h"
-#include "util/dstr.h"
 #include <stdio.h>
 #include <fstream>
+#include <stdio.h>
+#include <chrono>    // std::chrono::seconds
 extern "C"{
+	#include "util/dstr.h"
 	#include "net-if.h"
+	#include "util/bmem.h"
 }
+// rtmp errors
+#define JERKY_SUCESS                              0
+#define JERKY_FAILED                              -1
+#define JERKY_RTMPSEND_ERROR                      100
+#define JERKY_RTMPCONNECT_ERROR                   101
+
+#define StreamChannel_Metadata  0x03
+#define StreamChannel_Video     0x04
+#define StreamChannel_Audio     0x05
 
 void *rtmp_stream_create()
 {
 	struct rtmp_stream *stream = (rtmp_stream *) bzalloc (sizeof(struct rtmp_stream));
-
+	stream -> packets_mutex = new std::mutex();
 	RTMP_Init(&stream->rtmp);
 	RTMP_LogSetLevel(RTMP_LOGWARNING);
 
+	stream -> sent_headers = false;
 
 	return stream;
 }
@@ -187,4 +199,95 @@ inline void free_packets(struct rtmp_stream *stream)
 		circlebuf_pop_front(&stream->packets, &packet, sizeof(packet));
 		obs_free_encoder_packet(&packet);
 	}
+}
+
+static inline bool get_next_packet(struct rtmp_stream *stream, struct jerky_av_packet *packet)
+{
+	bool new_packet = false;
+	stream->packets_mutex->lock();
+	if (stream->packets.size) {
+		circlebuf_pop_front(&stream->packets, packet,
+			sizeof(struct jerky_video_packet));
+		new_packet = true;
+	}
+	stream->packets_mutex->unlock();
+
+	return new_packet;
+}
+
+int send_packet(RTMP* m_pRtmp, const char *data, int dataSize, unsigned long long timestamp, unsigned int pktType, int channel)
+{
+	if (m_pRtmp == NULL) {
+		return FALSE;
+	}
+
+	RTMPPacket packet;
+	RTMPPacket_Reset(&packet);
+	RTMPPacket_Alloc(&packet, dataSize);
+#ifdef DEBUG_RTMPMUXER
+	int dataSize = data.size();
+	//printf("data.size = %d",dataSize);
+#endif
+	packet.m_packetType = pktType;
+	packet.m_nChannel = channel;
+	packet.m_headerType = RTMP_PACKET_SIZE_LARGE;
+	packet.m_nTimeStamp = timestamp;
+
+	//log_trace("type:%d,timestamp:%d",pktType,timestamp);
+	packet.m_hasAbsTimestamp = 0;
+	packet.m_nInfoField2 = m_pRtmp->m_stream_id;
+	packet.m_nBodySize = dataSize;
+	memcpy(packet.m_body, data, dataSize);
+
+	int ret = RTMP_SendPacket(m_pRtmp, &packet, 0);
+	RTMPPacket_Free(&packet);
+
+	if (ret != TRUE)
+	{
+		//        printf("RTMP_SendPacket error_code %d\n",ret);
+		//        fflush(stdout);
+		perror("RTMP_SendPacket error");
+		return ret;
+	}
+
+	return TRUE;
+}
+
+void * send_thread(void *data)
+{
+	struct rtmp_stream *stream = (rtmp_stream *)data;
+
+	while (stream -> startSend) {
+		struct jerky_av_packet packet;
+
+		if (!get_next_packet(stream, &packet)){
+			std::this_thread::sleep_for(std::chrono::microseconds(10));
+			continue;
+		}
+
+		if (!stream->sent_headers) {
+			if (stream->videoSH) {
+				int ret = JERKY_SUCESS;
+				if (send_packet(&stream->rtmp, (char *)((array_output_data *)(stream->videoSH->data.data))->bytes.array,
+					((array_output_data *)(stream->videoSH->data.data))->bytes.num,
+					stream->videoSH->pts, RTMP_PACKET_TYPE_VIDEO, StreamChannel_Video) != TRUE) {
+					ret = JERKY_RTMPSEND_ERROR;
+					break;
+				}
+			}
+			stream->sent_headers = true;
+		}
+		
+		if (send_packet(&stream->rtmp, (char *)((array_output_data *)(packet.data.data))->bytes.array,
+			((array_output_data *)(packet.data.data))->bytes.num,
+			packet.pts, RTMP_PACKET_TYPE_VIDEO, StreamChannel_Video) != TRUE) {
+			break;
+		}
+	}
+
+	RTMP_Close(&stream->rtmp);
+
+	free_packets(stream);
+	stream->sent_headers = false;
+	return NULL;
 }

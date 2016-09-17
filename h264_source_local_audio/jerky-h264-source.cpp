@@ -24,6 +24,7 @@ struct jerky_h264_source* jerky_h264_source_init(const char* url)
 	h264Source->nalhead_pos = 0;
 	h264Source->startSend = false;
 	h264Source->firstPush = true;
+	h264Source->got_sps_pps = false;
 
 	AVDictionary* options = NULL;
 	std::string strStreamUrl = h264Source->m_streamUrl;
@@ -83,19 +84,20 @@ int video_codec_init(jerky_h264_source* h264Source){
 	return 0;
 }
 
-void jerky_h264_source_thread(void *args){
+void * jerky_h264_source_thread(void *args){
 	struct jerky_h264_source *h264Source = (struct jerky_h264_source *) args;
 	AVPacket *packet = (AVPacket *)av_malloc(sizeof(AVPacket));
 	bool gotPicture = false;
 	int ret;
-	float timestamp = 0.0;
 	int got_picture = false;
 	AVFrame	*m_curFrame = av_frame_alloc();
-	bool got_sps_pps = false;
+	uint64_t timestamp = 33;
 	while (!h264Source->m_stop && av_read_frame(h264Source->m_formatCtx, packet) >= 0){
-
+		if (packet == NULL){
+			continue;
+		}
 		if (packet->stream_index == h264Source->m_videoIndex){
-			if (h264Source->startSend && (!h264Source->firstPush || packet->flags == 1 && !got_sps_pps)){
+			if (h264Source->startSend && (!h264Source->firstPush || packet->flags == 1 && h264Source->got_sps_pps)){
 				if (h264Source->firstPush){
 					h264Source->firstPush = false;
 				}
@@ -139,22 +141,33 @@ void jerky_h264_source_thread(void *args){
 						extraLength += 4 + naluUnit.size;
 					}
 				}
-				s_wb32(&avPacket->data, packet->size - extraLength);
-				s_write(&avPacket->data, (const char*)packet->data + extraLength, packet->size - extraLength);
+				s_w8(&avPacket->data, (packet->size - 4) >> 24 & 0xff);
+				s_w8(&avPacket->data, (packet->size - 4) >> 16 & 0xff);
+				s_w8(&avPacket->data, (packet->size - 4) >> 8 & 0xff);
+				s_w8(&avPacket->data, (packet->size - 4) >> 0 & 0xff);
+				s_write(&avPacket->data, (const char*)packet->data + 4, packet->size - 4);
 				avPacket->has_captured = true;
 				avPacket->has_encoded = true;
 
 				//XhxAVQueue::instance()->update_packet(bleAVPacket);
-				avPacket->pts = packet->pts;
-				avPacket->pts = avPacket->dts;
-
+				avPacket->pts = timestamp;
+				avPacket->dts = avPacket->pts;
+				timestamp += 33;
+				
+				if (h264Source->m_rtmpStream){
+					h264Source->m_rtmpStream->packets_mutex->lock();
+					circlebuf_push_back(&h264Source->m_rtmpStream->packets, avPacket,
+						sizeof(struct jerky_video_packet));
+					h264Source->m_rtmpStream->packets_mutex->unlock();
+				}
 				//XhxAVQueue::instance()->enqueue(bleAVPacket);
 			}
 
 
 			int ret = avcodec_decode_video2(h264Source->m_videoCodecCtx, m_curFrame, &got_picture, packet);
 
-			if (got_picture && packet->flags == 1 && !got_sps_pps){
+			if (!h264Source->got_sps_pps && packet->flags == 1 && got_picture){
+
 				//Ð´ÎÄ¼þÍ·£¨Write file header£©  
 				AVBitStreamFilterContext* h264bsfc = av_bitstream_filter_init("h264_mp4toannexb");
 				av_bitstream_filter_filter(h264bsfc, h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec, NULL, &packet->data, &packet->size, packet->data, packet->size, 0);
@@ -165,7 +178,7 @@ void jerky_h264_source_thread(void *args){
 				printf("%x\n", h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata);
 				fetchSpsPps(h264Source, packet);
 
-				jerky_video_packet * videoHeadPacket = (jerky_video_packet *)malloc(sizeof(jerky_video_packet *));
+				jerky_video_packet * videoHeadPacket = new jerky_video_packet(Video_Type_H264);
 				videoHeadPacket->dts = 0;
 				videoHeadPacket->pts = 0;
 
@@ -187,7 +200,7 @@ void jerky_h264_source_thread(void *args){
 				s_w8(&videoHeadPacket->data, 0xff);
 
 				/*sps*/
-				s_w8(&videoHeadPacket->data, 0xe1); 
+				s_w8(&videoHeadPacket->data, 0xe1);
 				s_wb16(&videoHeadPacket->data, h264Source->m_metaData->nSpsLen);
 				s_write(&videoHeadPacket->data, h264Source->m_metaData->Sps, h264Source->m_metaData->nSpsLen);
 
@@ -212,13 +225,17 @@ void jerky_h264_source_thread(void *args){
 					memcpy(h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata + 8 + h264Source->m_metaData->nSpsLen + 3, h264Source->m_metaData->Pps, h264Source->m_metaData->nPpsLen);
 					h264Source->m_formatCtx->streams[h264Source->m_videoIndex]->codec->extradata_size = 11 + h264Source->m_metaData->nPpsLen + h264Source->m_metaData->nSpsLen;
 				}
+				if (h264Source->m_rtmpStream){
+					h264Source->m_rtmpStream->videoSH = videoHeadPacket;
+				}
 				av_free_packet(packet);
-				got_sps_pps = true;
+				h264Source->got_sps_pps = true;
 				continue;
 			}
 		}
 		av_free_packet(packet);
 	}
+	return NULL;
 }
 
 int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet){
@@ -396,12 +413,16 @@ int ReadOneNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigne
 	return FALSE;
 }
 
-
+void startCapture(void *args){
+	struct jerky_h264_source *h264Source = (struct jerky_h264_source *) args;
+	pthread_t thread;
+	int ret = pthread_create(&thread, NULL, jerky_h264_source_thread, h264Source);
+}
 /*int main(int argc, char* argv[]){
-	jerky_h264_source* h264Source = jerky_h264_source_init();
-	std::thread h264SourceThread(jerky_h264_source_thread, h264Source);
-	h264SourceThread.join();
+jerky_h264_source* h264Source = jerky_h264_source_init();
+std::thread h264SourceThread(jerky_h264_source_thread, h264Source);
+h264SourceThread.join();
 
-	system("pause");
-	return 0;
+system("pause");
+return 0;
 }*/

@@ -3,77 +3,158 @@
   <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <Extensions>cpp;cxx;c;def</Extensions>
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{480dc962-5903-45b0-be23-0bb0ea04c8c0}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{d536751d-0d78-4ee3-b646-10cd9bf8304f}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Header Files\util">
-      <UniqueIdentifier>{aeb57747-ca43-470a-981a-94e14cbcd1d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util\windows">
-      <UniqueIdentifier>{da25604c-64ac-4ab9-a7fe-643c6a89555f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util">
-      <UniqueIdentifier>{5e299f61-42f9-44e4-93dd-a762cc3b92fe}</UniqueIdentifier>
+      <UniqueIdentifier>{6dedcada-b843-484d-939e-91d8c0ab4352}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\rtmp">
-      <UniqueIdentifier>{4222cd7e-b360-46f4-8ded-8d31e5b39247}</UniqueIdentifier>
+      <UniqueIdentifier>{dcf57123-2e57-4ba5-b689-58afcd10abeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{0c3e3383-b551-4f43-ad4c-51c5caf0556f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\rtmp">
-      <UniqueIdentifier>{935dd58c-fa15-4f95-a3ee-3cad6228af78}</UniqueIdentifier>
+      <UniqueIdentifier>{249f256f-c6f3-4d50-a839-96eb7650369a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util\windows">
+      <UniqueIdentifier>{145d47f0-3f1d-46de-a2bb-3135fc04cf26}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jerky-h264-source.h">
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="h264_source_local_audio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_h264_source_local_audio.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_h264_source_local_audio.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_h264_source_local_audio.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\amf.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\cencode.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\hashswf.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\log.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\md5.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\parseurl.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="rtmp\rtmp.c">
+      <Filter>Source Files\rtmp</Filter>
+    </ClCompile>
+    <ClCompile Include="util\array-serializer.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\base.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\bmem.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\dstr.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\lexer.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\platform.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\platform-windows.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\threading-windows.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="util\utf8.c">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="net-if.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mglobal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mstream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mstring.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mstringlist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jerky-h264-source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jerky-encoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jerky-rtmp-stream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="h264_source_local_audio.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="jerky-rtmp-stream.h">
+    </CustomBuild>
+    <CustomBuild Include="h264_source_local_audio.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="h264_source_local_audio.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="jerky-h264-source.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="jerky-circlebuf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util\base.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\bmem.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\c99defs.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\darray.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\dstr.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\lexer.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\windows\win-version.h">
-      <Filter>Header Files\util\windows</Filter>
-    </ClInclude>
-    <ClInclude Include="util\threading.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\threading-windows.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\utf8.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="util\platform.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="jerky-encoder.h">
-      <Filter>Header Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_h264_source_local_audio.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="rtmp\amf.h">
       <Filter>Header Files\rtmp</Filter>
@@ -111,95 +192,71 @@
     <ClInclude Include="util\array-serializer.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="util\base.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\bmem.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\c99defs.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\darray.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dstr.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\lexer.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\platform.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
     <ClInclude Include="util\serializer.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\threading.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\threading-windows.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\utf8.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\windows\win-version.h">
+      <Filter>Header Files\util\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="jerky-circlebuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jerky-encoder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jerky-rtmp-stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mglobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mstring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mstringlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="net-if.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui_jerky_main_window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="jerky-h264-source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="util\base.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\bmem.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\dstr.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\lexer.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\platform.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\platform-windows.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\threading-windows.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="util\utf8.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="jerky-rtmp-stream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="net-if.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="jerky-encoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\amf.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\cencode.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\hashswf.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\log.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\md5.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\parseurl.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="rtmp\rtmp.c">
-      <Filter>Source Files\rtmp</Filter>
-    </ClCompile>
-    <ClCompile Include="util\array-serializer.c">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="jerky_main_window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="h264_source_local_audio.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="jerky_main.ui">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="jerky_main_window.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
+    <ResourceCompile Include="h264_source_local_audio.rc" />
   </ItemGroup>
 </Project>

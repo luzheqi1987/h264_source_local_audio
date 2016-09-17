@@ -2,13 +2,19 @@
 
 #include <iostream>
 #include <inttypes.h>
-#include "rtmp/rtmp.h"
-#include "rtmp/log.h"
-#include "util/bmem.h"
-#include "util/dstr.h"
 #include "jerky-circlebuf.h"
 #include "w32-pthreads/pthread.h"
+#include <thread>
+extern "C"{
+#include "util/bmem.h"
+#include "util/dstr.h"
 #include "util/array-serializer.h"
+#include "rtmp/rtmp.h"
+#include "rtmp/log.h"
+}
+#include <mutex> 
+
+#include "mstream.h"
 
 
 #define Packet_Type_Audio 0x08
@@ -31,6 +37,7 @@ struct jerky_av_packet
 	{
 
 	}
+	jerky_av_packet(){}
 	serializer data;
 	char pktType;
 	uint64_t pts;
@@ -66,7 +73,8 @@ struct jerky_video_packet : jerky_av_packet
 struct rtmp_stream {
 	struct jerky_circlebuf	packets;
 	bool					sent_headers;
-
+	std::mutex *			packets_mutex;
+	std::thread *           sendThread;
 	volatile bool			connecting;
 
 	volatile bool			active;
@@ -87,6 +95,7 @@ struct rtmp_stream {
 	int						dropped_frames;
 	jerky_av_packet			*videoSH;
 	jerky_av_packet			*audioSH;
+	bool					startSend;
 	RTMP					rtmp;
 };
 
@@ -99,3 +108,4 @@ inline void free_packets(struct rtmp_stream *stream);
 void *rtmp_stream_create();
 bool init_connect(struct rtmp_stream *stream, const char * url);
 int try_connect(struct rtmp_stream *stream);
+void * send_thread(void *data);

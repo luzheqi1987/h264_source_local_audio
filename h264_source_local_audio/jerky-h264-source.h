@@ -3,6 +3,10 @@
 #include "jerky-rtmp-stream.h"
 
 extern "C"{
+#include "util/array-serializer.h"
+}
+
+extern "C"{
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavutil/imgutils.h"
@@ -71,6 +75,8 @@ struct jerky_h264_source
 	rtmp_stream *		m_rtmpStream;
 	bool				startSend;
 	bool				firstPush;
+	bool				got_sps_pps;
+	std::thread *       sourceThread;
 };
 
 
@@ -78,9 +84,10 @@ struct jerky_h264_source
 struct jerky_h264_source* jerky_h264_source_init(const char* url);
 int find_video_index(jerky_h264_source* h264Source);
 int video_codec_init(jerky_h264_source* h264Source);
-void jerky_h264_source_thread(void *args);
+void * jerky_h264_source_thread(void *args);
 int ReadFirstNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigned char *packetData);
 int ReadOneNaluFromBuf(NaluUnit &nalu, int &nalhead_pos, int packetSize, unsigned char *packetData);
 int find_video_index(jerky_h264_source* h264Source);
 int video_codec_init(jerky_h264_source* h264Source);
 int fetchSpsPps(jerky_h264_source* h264Source, AVPacket *packet);
+void startCapture(void *args);
